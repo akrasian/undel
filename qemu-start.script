@@ -1,0 +1,65 @@
+cat << EOL
+
+First use?  Please edit this file.
+
+You must change KERNELDIR to point to the bzImage you want to use.
+
+By DEFAULT the KVM capability of qemu is not being used.  This makes
+the virtual processor run about 100x slower than it could.  But, it's
+able to run anywhere.
+
+To enable KVM, toggle the comment on the USE_KVM variable below.  You
+must be running on a Linux machine that has the intel_kvm module
+loaded.  You can check with
+
+   $ lsmod | grep kvm
+
+Other options have sane defaults.  Qemu will set up a virtual guest
+network so that you can access the outside world from within the VM.
+By default, the ssh server has its ports forwarded.  Thus, to ssh into
+the virtual machine
+
+   $ ssh root@localhost -p 2200
+
+The following user accounts : passwords exist
+
+   root    : root
+   451user : 451userpassword
+
+EOL
+
+# Comment out the following two lines to avoid delay.
+echo "Press Enter to continue"
+read
+
+# Edit this to point to where your bzImage is located.
+KERNELDIR=./path-to/bzImage
+
+
+# 10.0.2.xx is the default network created by Qemu.  It works for us.
+BOOTOPTS="rw console=ttyS0,115200n8 console=tty0 ip=10.0.2.15::10.0.2.1:255.255.255.0 fastboot raid=noautodetect"
+
+#NFSROOT="/usr/local/sysroot/wheezy"
+#ROOT="root=/dev/nfs nfsroot=10.0.2.2:$NFSROOT"
+ROOT="root=/dev/sda"
+
+# Comment out the nographic option to have Qemu pop up an SDL virtual
+# screen.
+#CONSOLE=""
+CONSOLE=-nographic
+
+USE_KVM=""
+#USE_KVM="-enable-kvm"
+
+# add "-cpu host \" below if running on a real processor
+qemu-system-x86_64 \
+    -gdb tcp::1234 \
+    -m 128M \
+    -smp cores=1,threads=1,sockets=1 \
+    -kernel $KERNELDIR \
+    -append "$ROOT $BOOTOPTS" \
+    -hda wheezy.raw \
+    $USE_KVM \
+    $CONSOLE \
+    -netdev user,id=usernet,hostfwd=tcp::2200-:22 \
+    -device netdev=usernet,driver=virtio-net 

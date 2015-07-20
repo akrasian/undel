@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en"><!-- Head
+ ================================================== --><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>COMP3430 Operating Systems</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="COMP3430%20Operating%20Systems_files/bootstrap.css" media="all">
+  <link rel="stylesheet" href="COMP3430%20Operating%20Systems_files/bootswatch.css">
+  <link rel="stylesheet" href="COMP3430%20Operating%20Systems_files/custom.html">
+</head>
+
+<!--Body 
+  ================================================== -->
+<body>
+  <div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <a class="navbar-brand"><img src="COMP3430%20Operating%20Systems_files/UM.png"></a>
+        <a class="navbar-brand" href="http://www.cs.umanitoba.ca/%7Ecomp3430/index.html">COMP3430</a>
+      <div class="navbar-collapse collapse" id="navbar-main">
+        <ul class="nav navbar-nav">
+          <li>
+            <a href="http://www.cs.umanitoba.ca/%7Ecomp3430/overview.html">Overview</a>
+          </li>
+          <li>
+            <a href="http://www.cs.umanitoba.ca/%7Ecomp3430/schedule.html">Schedule</a>
+          </li>
+          <li>
+            <a href="http://www.cs.umanitoba.ca/%7Ecomp3430/exercises.html">Exercises</a>
+          </li>
+          <li>
+            <a href="http://www.cs.umanitoba.ca/%7Ecomp3430/assignments.html">Assignments</a>
+          </li>
+          <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#" id="download">Information<span class="caret"></span></a>
+              <ul class="dropdown-menu" aria-labelledby="labs">
+                <li><a href="http://www.cs.umanitoba.ca/%7Ecomp3430/info/VM.html">Virtual Machine</a></li>
+                <li><a href="http://www.cs.umanitoba.ca/%7Ecomp3430/info/Linux.html">Linux</a></li>
+              </ul>
+            </li>
+      </ul></div>
+    </div>
+  </div>
+  
+  <!-- Contents
+    ================================================== -->
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-0"></div>
+        <div class="col-md-10">
+          <h1 id="assignment1">Assignment 3</h1>
+
+<p><strong>Out</strong>: Monday, June 22, 2015.
+</p><p><strong>Due</strong>: <s>Friday, July 17, 2015</s> Monday, July 20, 2015; Noon.
+</p><p><strong>Initial code</strong> <a href="http://www.cs.umanitoba.ca/%7Ecomp3430/code/assignment3-starter.tar.gz">starter</a> code.
+</p><p><strong>Mark:</strong> 18%
+</p><p><strong>Make sure to start early!</strong> 
+
+</p><h3>Preliminaries</h3>
+
+<p>This assignment aims to recover from the following common situation: 
+you've just finished writing an essay/report/paper due in the next hour,
+ but before you print it, you accidentally manage to delete it. It would
+ be very convenient to have a program for such situations capable of 
+undeleting files, and that, in fact, is the goal of this project.
+
+</p><p>Implementations of undelete are very file system-type specific. We're going to write undelete for the <code>ext2</code> file system, which was released close to 20 years ago now. The reason is that the file system layout in <code>ext2</code> is very similar to that of its successors, <code>ext3</code> and <code>ext4</code>, so it's pertinent to today's systems even if no one is using <code>ext2</code> any longer. Undelete is not possible for <code>ext3</code> and <code>ext4</code> without looking through the filesystem journal, which is a more complicated task than we would like to assign to you.
+
+</p><p>This assignment leaves most everything up to you. The coding 
+portion is relatively small; figuring out what to do is about half the 
+assignment and getting it implemented is the other half.
+
+</p><h3>Solution Plan</h3>
+
+<p>After reading over the following description of the project and browsing through the linked <code>ext2</code> resources, we invite you and your fellow group members to come up with a plan for implementing your project. As "simple" as <code>ext2</code>
+ is, it's still a complex filesystem, so there is a lot of room for 
+poorly-though-out code to go very far astray. If you submit a plan for 
+your project to <code>comp3430</code>via email by the next lab (<strong>B02</strong>
+ Thursday), we will review it and give you feedback, which will 
+hopefully save you from some major headaches close to the deadline. 
+Furthermore in writing a plan you will be forced to learn the specifics 
+of <code>ext2</code>, which is a great way to familiarize yourself with it prior to doing much or any coding.
+
+</p><h3>Skeleton Files</h3>
+
+<p>To start the assignment, you'll need to download a set of <a href="http://www.cs.umanitoba.ca/%7Ecomp3430/code/assignment3-starter.tar.gz">files</a> that I have prepared. This includes:
+
+</p><ul>
+<li><code>FC13-CSE451-2012-03-22.tar.gz</code>: An older version of the 
+linux kernel VMWare image. The newer kernel will zero out the inode 
+values after deletion. This will make your life hard. Please download 
+and use this <a href="http://www.cs.umanitoba.ca/%7Ecomp3430/code/FC13-CSE451-2012-03-22.tar.gz">image</a>, instead. <strong>NOTE: Using the kernel from project 1 in it's current state will not allow you to run a successful undelete</strong>. Extra credit will be offered for those who can modify the <a href="http://www.cs.umanitoba.ca/%7Ecomp3430/assignments/assign1.html">assignment 1</a> kernel to not zero out inode values.
+</li><li> <code>ext2fs.h</code>: Include this file in your <code>.c</code> file for common <code>ext2</code> definitions (it includes the <code>ext2_types.h</code>
+ header). You should rely on the macros provided here where possible 
+instead of doing arithmetic related to sizes and offsets yourself in 
+most cases.
+</li><li><code>fileIOExample.c</code>: This is a simple example of doing file IO in C, in case you are unfamiliar with how it works.
+</li><li><code>filesysFile-simple</code> and <code>filesysFile-easy</code>: These are two sample <code>ext2</code> filesystems on which you can start testing your code. You will definitely need to test more complex filesystems than these.
+</li><li><code>mkFilesysFile.sh</code>: This is a script for creating 
+and mounting ext2 filesystems. It takes two parameters: a file name and 
+the number of 1kiB blocks to use. You'll need to specify at least 60 
+blocks for it to succeed. Furthermore, you will need root access to 
+mount a filesystem, so you'll need to use either a personal machine or 
+the course virtual machine image.
+</li></ul>
+
+<h3>Your Task</h3>
+
+<p>You will be creating a program to recover deleted files in <code>ext2</code> filesystems. In <code>ext2</code>,
+ when a file is deleted, the file's inode and data blocks are marked as 
+free, its directory entry is invalidated, the deleted time of the file's
+ inode is set, and the number of hardlinks in the inode is set to 0. The
+ key thing here, though, is that the file's inode and data blocks are 
+still preserved, at least until the filesystem ends up reclaiming them. 
+You will write a utility in C called <code>undelete</code> that is capable of recovering these files as follows:
+
+</p><ul>
+<li>Your <code>undelete</code> executable should take the name of a filesystem file as an argument, e.g. ./undelete [ext2fs-filename].
+</li><li>For every deleted file in the specified filesystem, write the file to <code>recovered_files/[ext2fs-filename]/</code>
+ relative to the directory from which undelete was invoked (i.e. as a 
+file in the real filesystem and not the one you're processing).
+</li><li>Name each file <code>file-nnnnn</code>, where <code>nnnnn</code> is the inode number of the deleted file.
+</li><li>Restore each file's access time, modified time, and contents. For example, suppose the file <code>sample.txt</code> has inode number 12 and has been deleted from <code>sample-filesystem</code>. Running the <code>undelete</code> program on <code>sample-filesystem</code> should create a file <code>recovered_files/sample-filesystem/file-00012</code> with the access and modification timestamps of <code>sample.txt</code> and the same contents. See <code>man 3 futimes</code> for help with changing access and modification times.
+</li><li>For deleted inodes that do not correspond to files, take no action.
+</li><li>Restore only files that have been deleted. You <em>will</em> need to make use of the inode bitmap for this.
+</li><li>There is a possibility that part of a deleted file has been 
+reclaimed for use by something else. The goal of this project is not to 
+build an extremely robust file recovery solution, so you don't need to 
+worry about handling this gracefully.
+</li><li>You will need to handle multiple level of data block 
+indirection as well as multiple block groups. The provided filesystems 
+do not exercise these features of <code>ext2</code> at all, so it is up to you to create sample filesystems that do.
+</li><li>Do not seek unnecessarily through the filesystem file. In 
+particular, you should not need to visit every single inode if there are
+ many non-deleted files and only one deleted file.
+</li><li>You may not keep an unbounded number of inodes and data blocks 
+in memory at once (or any structure for that matter). In particular, you
+ should be able to restore a 2 GiB filesystem with about 2 GiB worth of 
+deleted files while using the same (small) amount of memory as if you 
+were restoring a 10 MiB filesystem. You have some flexibility here; just
+ make sure that the number of inodes and data blocks kept in memory is 
+small relative to the size of the filesystems.
+</li><li>You may not steal code from existing file recovery tools. Most 
+build on existing frameworks, which isn't going to help you anyway, so 
+just don't do it.
+</li></ul>
+
+<h3>Using the filesystem creation tool</h3>
+
+<p>The filesystem creation tool provided with the starter code above is 
+fairly simply, and you are free to customize it as you like. Here is 
+what it contains:
+
+<code>
+</code></p><pre><code>#!/bin/bash
+
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 [filename] [size-in-1kB-blocks]"
+    exit 1
+fi
+
+dd if=/dev/zero bs=1024 count=$2 of=$1 &amp;&amp; mkfs.ext2 -F -b 1024 -c $1 &amp;&amp; \
+  tune2fs -c0 -i0 $1 &amp;&amp; mkdir -p mnt &amp;&amp; sudo mount -o loop $1 mnt
+
+echo
+
+if [ $? -eq 0 ]; then
+    echo "Mount completed successfully! Use 'sudo umount mnt' to unmount"
+else
+    echo "Mount failed...please try again."
+fi
+</code></pre><code>
+</code>
+
+<ul>
+<li>The <code>dd</code> command copies data from a device (in this case <code>/dev/zero</code>, which outputs 0s) to an output file using a given number of blocks of a certain size.
+</li><li>The <code>mkfs.ext2</code> command creates an <code>ext2</code> filesystem in the given file with blocks of the given size (1024 bytes).
+</li><li>The <code>tune2fs</code> command prevents the OS from running <code>fsck</code> on the filesystem automatically, since that could modify the filesystem in ways you don't expect.
+</li><li>The <code>mkdir</code> command creates a mount point for the filesystem.
+</li><li>The <code>mount</code> command mounts the filesystem using <code>mnt</code> as a mount point. Use this command by itself to mount an already-created filesystem.
+</li></ul>
+
+<p><code>mount</code> requires root privilege, so you will only be able to run this on your own machine or on a VM image.
+
+</p><p>When you create a filesystem and mount it, you will not 
+necessarily see the changes to the filesystem file until you unmount the
+ filesystem. For example, let's say that you create and mount a 
+filesystem file named <code>test</code>. You then create a file on it through <code>echo "Some file contents" &gt; mnt/sample.txt</code> and delete the file with <code>rm mnt/sample.txt</code>. Before you run your undelete tool to try to recover the file, first run <code>sudo umount mnt</code> to flush the changes to disk. To mount the filesystem again, use <code>sudo mount -o loop test mnt</code>. If you don't unmount the filesystem, you won't necessarily see the changes reflected in it.
+
+</p><h4>Debugging</h4>
+
+<p>An important part of this project is debugging. You're going to run 
+into off-by-one errors - it's pretty much guaranteed, given that block 
+and inode numbering is kind of funny. If it doesn't seem like you're 
+reading the right data from the filesystem file for the block or inode 
+number you are using, there are a couple different tools to help you. 
+First of all, make liberal use of debug printing. To make a switch for 
+enabling or disabling printing of debug statements, add some code like 
+this near the top of your source file:
+
+<code>
+</code></p><pre><code>#define COMP3430_DEBUG 
+#ifdef  COMP3430_DEBUG
+#define LOG_PRINTF(...) printf(__VA_ARGS__)
+#else
+#define LOG_PRINTF(...)
+#endif
+</code></pre><code>
+</code>
+
+<p>Any macro name is fine, really, as long as you don't override any existing or commonly-used macros. Use <code>LOG_PRINTF</code> just as you would <code>printf</code>. To disable debug output, simply remove the <code>#define COMP3430_DEBUG</code> line.
+
+</p><p>After setting up debug printing through something like the above,
+ when you go to read something from disk, print out its absolute offset 
+within the file as a hexadecimal value (e.g. 0x4000). If what you read 
+at that point doesn't match your expectations, open the filesystem file 
+using a hexeditor such as <code>hexedit</code>. Look at the data around 
+that location. Was the data close by? Try to identify whether you were 
+off by one index or whether you were looking in the wrong place 
+entirely.
+
+</p><p>There is a tool called <code>dumpe2fs</code> that will be very useful to you as well (see <code>man dumpe2fs</code>).
+ It prints a variety of information about offsets, which inodes are 
+free, etc. and you can (and should) use this for figuring out what the 
+expected values at various points in your undelete utility are.
+
+</p><p>When you want to test recovery of large files, try using image 
+files. If you are able to recover a deleted image file, it should appear
+ as before, and you should quickly be able to tell whether any of the 
+data was corrupted.
+
+</p><p><strong>Hints</strong>: Removing files in the kernel is a system call labeled as an '<code>unlink</code>.' The code that zeros out inodes is handled through code for the <code>ext2</code> file system specifically, <code>fs/ext2a</code>/.
+ It will be close to impossible to get the extra credit working without a
+ working version of undelete to test against, develop a working version 
+of undelete with the older linux kernel prior to attempting the extra 
+credit.
+
+</p><h4><code>ext2</code> references</h4>
+
+<p>There is a wealth of information about the layout of <code>ext2</code> filesystems online. In order of helpfulness, I would recommend reading the following pages:
+
+</p><ul>
+<li> <a href="http://www.nongnu.org/ext2-doc/ext2.html">http://www.nongnu.org/ext2-doc/ext2.html</a>: If you were going to use only one reference for this project, it would be this one. It covers all attributes of <code>ext2</code> that you need to know.
+</li><li><a href="http://www.tldp.org/LDP/tlk/fs/filesystem.html">http://www.tldp.org/LDP/tlk/fs/filesystem.html</a>: A description of <code>ext2</code> from a book about the Linux kernel from quite some time ago.
+</li><li><a href="http://homepage.smc.edu/morgan_david/cs40/analyze-ext2.htm">http://homepage.smc.edu/morgan_david/cs40/analyze-ext2.htm</a>: Somewhat less technical than the above two sources, but walks through some helpful examples.
+</li></ul>
+
+<h4>Submission Instructions</h4>
+
+<p><a href="https://umanitoba.desire2learn.com/d2l/lms/dropbox/user/folder_submit_files.d2l?db=30530&amp;grpid=0&amp;isprv=0&amp;bp=0&amp;ou=164018">Submit</a> an archive named <code>csid1-csid2.tar.gz</code>, which contains:
+
+</p><ul>
+<li>All of the source files.
+
+</li><li>A file named <code>README</code> with a high-level description 
+of how your undelete implementation works. If you attempted the extra 
+credit please describe your changes here including the files modified, 
+and the modifications you made.
+
+</li><li>If you completed the extra credit, please create a new directory called '<code>kernel</code>' in your top level directory of your submission in which you place all of the files you modified from the <a href="http://www.cs.umanitoba.ca/%7Ecomp3430/assignments/assign1.html">Assignment 1</a> kernel, as well as a compiled version of the <code>bzImage</code>.
+</li></ul>
+
+<h4>Grading </h4>
+<p>The grade on this assignment will be calculated as follows:
+
+</p><ul>
+<li> <b>TBA</b>: 20 points
+</li><li> <b>Extra Credit</b>: 5 points
+</li></ul>
+
+        </div>
+      </div>
+
+      <!-- Footer
+      ================================================== -->
+      <footer>
+<hr>
+        <div class="pull-right">
+          <div class="col-lg-12">
+            <sup>Prepared by <a href="http://www.cs.umanitoba.ca/%7Erasit">
+                              Dr. Rasit Eskicioglu</a>,
+               using <a href="http://bootswatch.com/simplex/">
+                        Bootswatch Simplex Theme</a></sup>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Scripts
+    ================================================== -->
+    <script src="COMP3430%20Operating%20Systems_files/jquery-1.js"></script>
+    <script src="COMP3430%20Operating%20Systems_files/bootstrap.js"></script>
+    <script src="COMP3430%20Operating%20Systems_files/bootswatch.js"></script>
+  
+
+</body></html>
